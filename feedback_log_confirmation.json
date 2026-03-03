@@ -1,0 +1,23 @@
+{
+  "confirmation": "General-feedback log entry recorded. Invoke logFeedback() with the payload below to persist to Supabase.",
+  "record": {
+    "feedback_id": "pending-uuid-on-insert",
+    "category": "general",
+    "title": "Appreciation: New Tab page",
+    "summary": "User expressed gratitude; no issue described.",
+    "page_url": "chrome://newtab/",
+    "page_title": "New Tab",
+    "message": "Thank you.",
+    "sentiment": "positive",
+    "source_url": "chrome://newtab/",
+    "timestamp": "2025-03-03T00:00:00.000Z"
+  },
+  "persisted_fields": {
+    "source_url": "chrome://newtab/",
+    "page_title": "New Tab",
+    "message": "Thank you.",
+    "sentiment": "positive",
+    "category": "general"
+  },
+  "notes": "Use logFeedback() from @/api/feedback or @/lib/feedback-logger with the persisted_fields to create the record in Supabase. The feedback_logs table stores source_url, page_title, message, sentiment, category, and created_at. Title and summary are documented here for reference."
+}
