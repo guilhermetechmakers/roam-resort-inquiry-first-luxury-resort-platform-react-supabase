@@ -1,0 +1,12 @@
+{
+  "migration_name": "20250303120000_add_feedback_user_session",
+  "created_at": "2025-03-03T12:00:00.000Z",
+  "description": "Add optional user_id and session_id to feedback_logs for analytics",
+  "tables_created": [],
+  "tables_modified": ["feedback_logs"],
+  "tables_deleted": [],
+  "breaking_changes": false,
+  "rollback_sql": "ALTER TABLE public.feedback_logs DROP COLUMN IF EXISTS user_id; ALTER TABLE public.feedback_logs DROP COLUMN IF EXISTS session_id; DROP INDEX IF EXISTS idx_feedback_logs_user_id;",
+  "estimated_rows": 0,
+  "requires_downtime": false
+}

@@ -1,6 +1,11 @@
 import { supabase } from '@/lib/supabase';
-import type { CreateFeedbackInput, FeedbackLog, LogFeedbackResponse } from '@/types/feedback';
-import { FEEDBACK_ACKNOWLEDGMENT } from '@/types/feedback';
+import type {
+  AnalyticsFeedbackItem,
+  CreateFeedbackInput,
+  FeedbackLog,
+  LogFeedbackResponse,
+} from '@/types/feedback';
+import { FEEDBACK_ACKNOWLEDGMENT, toAnalyticsFeedbackItem } from '@/types/feedback';
 import { z } from 'zod';
 
 const createFeedbackSchema = z
@@ -11,7 +16,10 @@ const createFeedbackSchema = z
     message: z.string().optional(),
     text: z.string().optional(),
     sentiment: z.string().optional().default('positive'),
-    category: z.string().optional().default('general'),
+    category: z.string().optional(),
+    feedback_type: z.string().optional(),
+    user_id: z.string().uuid().nullable().optional(),
+    session_id: z.string().nullable().optional(),
   })
   .refine(
     (d) => (d.source_url ?? d.page_url ?? '').length > 0,
@@ -26,12 +34,15 @@ const createFeedbackSchema = z
     page_title: d.page_title.trim(),
     message: (d.message ?? d.text ?? '').trim(),
     sentiment: d.sentiment ?? 'positive',
-    category: d.category ?? 'general',
+    category: d.category ?? d.feedback_type ?? 'general',
+    user_id: d.user_id ?? null,
+    session_id: d.session_id ?? null,
   }));
 
 /**
  * Converts a non-actionable user message into an internal feedback log entry.
  * Validates content is non-empty, persists to Supabase, returns success + feedback_id + log_entry.
+ * Attaches user_id/session_id when available (from input or current Supabase session).
  * No UI changes. Use acknowledgment for feedback widget display.
  */
 export async function logFeedback(input: CreateFeedbackInput): Promise<LogFeedbackResponse> {
@@ -43,17 +54,27 @@ export async function logFeedback(input: CreateFeedbackInput): Promise<LogFeedba
     };
   }
 
-  const { source_url, page_title, message, sentiment, category } = parsed.data;
+  let { source_url, page_title, message, sentiment, category, user_id, session_id } = parsed.data;
+
+  // Attach user_id when available (authenticated) and not provided
+  if (user_id == null) {
+    const { data: session } = await supabase.auth.getSession();
+    if (session?.session?.user?.id) user_id = session.session.user.id;
+  }
+
+  const insertPayload: Record<string, unknown> = {
+    source_url,
+    page_title,
+    message,
+    sentiment,
+    category,
+  };
+  if (user_id != null) insertPayload.user_id = user_id;
+  if (session_id != null) insertPayload.session_id = session_id;
 
   const { data, error } = await supabase
     .from('feedback_logs')
-    .insert({
-      source_url,
-      page_title,
-      message,
-      sentiment,
-      category,
-    })
+    .insert(insertPayload)
     .select('*')
     .single();
 
@@ -65,10 +86,13 @@ export async function logFeedback(input: CreateFeedbackInput): Promise<LogFeedba
   }
 
   const logEntry = data as FeedbackLog;
+  const analytics_item: AnalyticsFeedbackItem = toAnalyticsFeedbackItem(logEntry);
+
   return {
     success: true,
     feedback_id: logEntry.id,
     log_entry: logEntry,
+    analytics_item,
     acknowledgment: FEEDBACK_ACKNOWLEDGMENT,
   };
 }

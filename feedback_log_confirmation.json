@@ -19,5 +19,17 @@
     "sentiment": "positive",
     "category": "general"
   },
-  "notes": "Use logFeedback() from @/api/feedback or @/lib/feedback-logger with the persisted_fields to create the record in Supabase. The feedback_logs table stores source_url, page_title, message, sentiment, category, and created_at. Title and summary are documented here for reference."
+  "ready_to_ingest_analytics_item": {
+    "feedback_id": "uuid-from-insert",
+    "page_url": "chrome://newtab/",
+    "page_title": "New Tab",
+    "feedback_text": "Thank you.",
+    "sentiment": "positive",
+    "feedback_type": "general",
+    "timestamp": "ISO8601-from-created_at",
+    "user_id": "optional-when-authenticated",
+    "session_id": "optional-when-available"
+  },
+  "usage": "import { logFeedback, NEW_TAB_THANK_YOU_FEEDBACK } from '@/lib/feedback-logger'; const res = await logFeedback(NEW_TAB_THANK_YOU_FEEDBACK); if (res.success) { /* res.analytics_item is ready for analytics backend */ }",
+  "notes": "Use logFeedback() from @/api/feedback or @/lib/feedback-logger. Pass NEW_TAB_THANK_YOU_FEEDBACK for the New Tab 'Thank you.' case. Response.analytics_item is the ready-to-ingest format for the analytics backend. user_id/session_id are attached when available."
 }
