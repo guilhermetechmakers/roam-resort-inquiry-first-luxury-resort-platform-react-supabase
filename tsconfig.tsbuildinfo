@@ -1,0 +1,1 @@
+{"root":["./src/App.tsx","./src/main.tsx","./src/vite-env.d.ts","./src/api/feedback.ts","./src/hooks/useFeedback.ts","./src/lib/feedback-logger.ts","./src/lib/supabase.ts","./src/types/feedback.ts"],"version":"5.9.3"}
