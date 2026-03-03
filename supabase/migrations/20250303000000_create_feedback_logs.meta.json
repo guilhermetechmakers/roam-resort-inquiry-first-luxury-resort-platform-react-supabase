@@ -1,0 +1,12 @@
+{
+  "migration_name": "20250303000000_create_feedback_logs",
+  "created_at": "2025-03-03T00:00:00.000Z",
+  "description": "Internal feedback logging for non-actionable user messages (e.g. Thank you.)",
+  "tables_created": ["feedback_logs"],
+  "tables_modified": [],
+  "tables_deleted": [],
+  "breaking_changes": false,
+  "rollback_sql": "DROP TABLE IF EXISTS public.feedback_logs CASCADE;",
+  "estimated_rows": 0,
+  "requires_downtime": false
+}
